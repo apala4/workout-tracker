@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Week of {{ week_dates[0].strftime('%b %d, %Y') }}</h1>
+<div class="history-nav">
+  <a href="{{ url_for('history', week=offset - 1) }}">&larr; Previous</a>
+  {% if offset < -1 %}
+  <a href="{{ url_for('history', week=offset + 1) }}">Next &rarr;</a>
+  {% endif %}
+</div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Exercise</th>
+        {% for d in week_dates %}
+        <th>{{ d.strftime('%a') }}<br><small>{{ d.strftime('%d') }}</small></th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ex in exercises %}
+      <tr>
+        <td class="ex-name">{{ ex.name }}</td>
+        {% for d in week_dates %}
+          {% set planned = plan.get((ex.id, d.weekday())) %}
+          {% set logged = logs.get((ex.id, d.isoformat())) %}
+          {% if planned %}
+          <td class="cell past">
+            <span class="planned">{{ planned }}</span>
+            {% if logged %}<span class="logged">&#x2713;{{ logged }}</span>
+            {% else %}<span class="missed">&#x2014;</span>{% endif %}
+          </td>
+          {% else %}
+          <td class="cell past empty">&#x2014;</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
