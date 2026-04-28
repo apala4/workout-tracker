@@ -21,6 +21,7 @@ def init_db():
             exercise_id  INTEGER NOT NULL REFERENCES exercises(id),
             weekday      INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),
             planned_reps INTEGER NOT NULL,
+            plan_note    TEXT DEFAULT NULL,
             PRIMARY KEY (exercise_id, weekday)
         );
         CREATE TABLE IF NOT EXISTS workout_logs (
@@ -29,6 +30,12 @@ def init_db():
             date        DATE NOT NULL,
             actual_reps INTEGER NOT NULL,
             UNIQUE (exercise_id, date)
+        );
+        CREATE TABLE IF NOT EXISTS workout_notes (
+            exercise_id INTEGER NOT NULL REFERENCES exercises(id),
+            date        DATE NOT NULL,
+            note        TEXT NOT NULL,
+            PRIMARY KEY (exercise_id, date)
         );
     """)
     conn.commit()

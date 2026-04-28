@@ -70,3 +70,17 @@ def test_log_workout_replaces_existing(tmp_db):
     db.log_workout(ex_id, today.isoformat(), 12)
     logs = db.get_week_logs(monday)
     assert logs[(ex_id, today.isoformat())] == 12
+
+def test_init_creates_workout_notes_table(tmp_db):
+    conn = db.get_db()
+    tables = {r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    ).fetchall()}
+    conn.close()
+    assert 'workout_notes' in tables
+
+def test_weekly_plan_has_plan_note_column(tmp_db):
+    conn = db.get_db()
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(weekly_plan)").fetchall()}
+    conn.close()
+    assert 'plan_note' in cols
