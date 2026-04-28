@@ -74,3 +74,22 @@ def test_api_log(client, tmp_db):
     monday = date.today() - timedelta(days=date.today().weekday())
     logs = db.get_week_logs(monday)
     assert logs[(ex_id, today_str)] == 8
+
+def test_api_note_saves_note(client, tmp_db):
+    db.add_exercise('Squats')
+    ex_id = db.get_active_exercises()[0]['id']
+    today_str = date.today().isoformat()
+    resp = client.post(
+        '/api/note',
+        data=json.dumps({'exercise_id': ex_id, 'date': today_str, 'note': 'felt great'}),
+        content_type='application/json'
+    )
+    assert resp.status_code == 200
+    assert resp.get_json() == {'ok': True}
+    monday = date.today() - timedelta(days=date.today().weekday())
+    notes = db.get_week_notes(monday)
+    assert notes[(ex_id, today_str)] == 'felt great'
+
+def test_api_note_invalid_json_returns_400(client):
+    resp = client.post('/api/note', data='not-json', content_type='application/json')
+    assert resp.status_code == 400

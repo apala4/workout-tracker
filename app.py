@@ -76,6 +76,14 @@ def api_log():
     db.log_workout(int(data['exercise_id']), data['date'], int(data['actual_reps']))
     return jsonify({'ok': True})
 
+@app.route('/api/note', methods=['POST'])
+def api_note():
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({'ok': False, 'error': 'invalid json'}), 400
+    db.save_note(int(data['exercise_id']), data['date'], data.get('note', '').strip())
+    return jsonify({'ok': True})
+
 if __name__ == '__main__':
     db.init_db()
     app.run(host='0.0.0.0', port=5000)
