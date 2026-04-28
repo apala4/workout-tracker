@@ -23,7 +23,10 @@ def index():
 
 @app.route('/history')
 def history():
-    offset = int(request.args.get('week', -1))
+    try:
+        offset = int(request.args.get('week', -1))
+    except ValueError:
+        offset = -1
     if offset >= 0:
         offset = -1
     monday = _week_start(offset)
@@ -67,7 +70,9 @@ def admin_plan():
 
 @app.route('/api/log', methods=['POST'])
 def api_log():
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'ok': False, 'error': 'invalid json'}), 400
     db.log_workout(int(data['exercise_id']), data['date'], int(data['actual_reps']))
     return jsonify({'ok': True})
 
