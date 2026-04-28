@@ -84,3 +84,32 @@ def test_weekly_plan_has_plan_note_column(tmp_db):
     cols = {r[1] for r in conn.execute("PRAGMA table_info(weekly_plan)").fetchall()}
     conn.close()
     assert 'plan_note' in cols
+
+def test_get_plan_notes_empty(tmp_db):
+    assert db.get_plan_notes() == {}
+
+def test_save_and_get_plan_notes(tmp_db):
+    db.add_exercise('Push-ups')
+    ex_id = db.get_active_exercises()[0]['id']
+    db.save_weekly_plan(
+        [(ex_id, 0, 20), (ex_id, 2, 25)],
+        notes={(ex_id, 0): '10kg', (ex_id, 2): 'bodyweight'}
+    )
+    notes = db.get_plan_notes()
+    assert notes[(ex_id, 0)] == '10kg'
+    assert notes[(ex_id, 2)] == 'bodyweight'
+    assert (ex_id, 1) not in notes
+
+def test_save_plan_notes_replaces_with_plan(tmp_db):
+    db.add_exercise('Push-ups')
+    ex_id = db.get_active_exercises()[0]['id']
+    db.save_weekly_plan([(ex_id, 0, 20)], notes={(ex_id, 0): 'heavy'})
+    db.save_weekly_plan([(ex_id, 0, 20)], notes={(ex_id, 0): 'light'})
+    assert db.get_plan_notes()[(ex_id, 0)] == 'light'
+
+def test_save_weekly_plan_without_notes_clears_notes(tmp_db):
+    db.add_exercise('Push-ups')
+    ex_id = db.get_active_exercises()[0]['id']
+    db.save_weekly_plan([(ex_id, 0, 20)], notes={(ex_id, 0): 'heavy'})
+    db.save_weekly_plan([(ex_id, 0, 20)])
+    assert db.get_plan_notes() == {}

@@ -57,6 +57,14 @@ def get_weekly_plan():
     conn.close()
     return {(r['exercise_id'], r['weekday']): r['planned_reps'] for r in rows}
 
+def get_plan_notes():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT exercise_id, weekday, plan_note FROM weekly_plan WHERE plan_note IS NOT NULL"
+    ).fetchall()
+    conn.close()
+    return {(r['exercise_id'], r['weekday']): r['plan_note'] for r in rows}
+
 def get_week_logs(week_start):
     week_end = week_start + timedelta(days=6)
     conn = get_db()
@@ -84,7 +92,7 @@ def delete_exercise(exercise_id):
     conn.commit()
     conn.close()
 
-def save_weekly_plan(plan):
+def save_weekly_plan(plan, notes=None):
     conn = get_db()
     active_ids = [
         r['id'] for r in conn.execute(
@@ -98,9 +106,11 @@ def save_weekly_plan(plan):
             active_ids
         )
     for exercise_id, weekday, planned_reps in plan:
+        note = (notes or {}).get((exercise_id, weekday)) or None
         conn.execute(
-            "INSERT INTO weekly_plan (exercise_id, weekday, planned_reps) VALUES (?, ?, ?)",
-            (exercise_id, weekday, planned_reps)
+            "INSERT INTO weekly_plan (exercise_id, weekday, planned_reps, plan_note) "
+            "VALUES (?, ?, ?, ?)",
+            (exercise_id, weekday, planned_reps, note)
         )
     conn.commit()
     conn.close()
