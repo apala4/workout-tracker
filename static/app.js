@@ -51,3 +51,15 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closePopup();
     if (e.key === 'Enter' && currentCell) submitLog();
 });
+
+function saveNote(input) {
+    fetch('/api/note', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            exercise_id: parseInt(input.dataset.exerciseId, 10),
+            date: input.dataset.date,
+            note: input.value.trim()
+        })
+    });
+}
