@@ -108,3 +108,12 @@ def test_admin_plan_saves_plan_note(client, tmp_db):
     assert resp.status_code == 200
     notes = db.get_plan_notes()
     assert notes.get((ex_id, 0)) == '10kg'
+
+def test_index_renders_note_inputs(client, tmp_db):
+    db.add_exercise('Push-ups')
+    ex_id = db.get_active_exercises()[0]['id']
+    weekday = date.today().weekday()
+    db.save_weekly_plan([(ex_id, weekday, 20)], notes={(ex_id, weekday): '10kg'})
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'note-input' in resp.data

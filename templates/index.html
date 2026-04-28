@@ -20,6 +20,8 @@
         {% for d in week_dates %}
           {% set planned = plan.get((ex.id, d.weekday())) %}
           {% set logged = logs.get((ex.id, d.isoformat())) %}
+          {% set plan_note = plan_notes.get((ex.id, d.weekday()), '') %}
+          {% set note_val = notes.get((ex.id, d.isoformat()), plan_note) %}
           {% if d == today %}
             {% if planned %}
             <td class="cell today"
@@ -33,6 +35,13 @@
               {% else %}
               <span class="hint">tap</span>
               {% endif %}
+              <input class="note-input"
+                     data-exercise-id="{{ ex.id }}"
+                     data-date="{{ d.isoformat() }}"
+                     value="{{ note_val }}"
+                     placeholder="note…"
+                     onclick="event.stopPropagation()"
+                     onblur="saveNote(this)">
             </td>
             {% else %}
             <td class="cell today empty">&#x2014;</td>
@@ -43,13 +52,27 @@
               <span class="planned">{{ planned }}</span>
               {% if logged %}<span class="logged">&#x2713;{{ logged }}</span>
               {% else %}<span class="missed">&#x2014;</span>{% endif %}
+              <input class="note-input"
+                     data-exercise-id="{{ ex.id }}"
+                     data-date="{{ d.isoformat() }}"
+                     value="{{ note_val }}"
+                     placeholder="note…"
+                     onblur="saveNote(this)">
             </td>
             {% else %}
             <td class="cell past empty">&#x2014;</td>
             {% endif %}
           {% else %}
             {% if planned %}
-            <td class="cell future"><span class="planned">{{ planned }}</span></td>
+            <td class="cell future">
+              <span class="planned">{{ planned }}</span>
+              <input class="note-input"
+                     data-exercise-id="{{ ex.id }}"
+                     data-date="{{ d.isoformat() }}"
+                     value="{{ note_val }}"
+                     placeholder="note…"
+                     onblur="saveNote(this)">
+            </td>
             {% else %}
             <td class="cell future empty">&#x2014;</td>
             {% endif %}

@@ -16,9 +16,12 @@ def index():
     week_dates = [monday + timedelta(days=i) for i in range(7)]
     exercises = db.get_active_exercises()
     plan = db.get_weekly_plan()
+    plan_notes = db.get_plan_notes()
     logs = db.get_week_logs(monday)
+    notes = db.get_week_notes(monday)
     return render_template('index.html',
-        exercises=exercises, plan=plan, logs=logs,
+        exercises=exercises, plan=plan, plan_notes=plan_notes,
+        logs=logs, notes=notes,
         week_dates=week_dates, today=today)
 
 @app.route('/history')
