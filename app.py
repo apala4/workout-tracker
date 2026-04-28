@@ -71,7 +71,7 @@ def admin_plan():
 @app.route('/api/log', methods=['POST'])
 def api_log():
     data = request.get_json(silent=True)
-    if not data:
+    if data is None:
         return jsonify({'ok': False, 'error': 'invalid json'}), 400
     db.log_workout(int(data['exercise_id']), data['date'], int(data['actual_reps']))
     return jsonify({'ok': True})
