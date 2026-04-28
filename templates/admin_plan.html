@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Weekly Plan</h1>
+{% if exercises %}
+<form method="POST">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Exercise</th>
+          {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+          <th>{{ day }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for ex in exercises %}
+        <tr>
+          <td class="ex-name">{{ ex.name }}</td>
+          {% for weekday in range(7) %}
+          <td>
+            <input type="number"
+                   name="plan_{{ ex.id }}_{{ weekday }}"
+                   value="{{ plan.get((ex.id, weekday), '') }}"
+                   min="1"
+                   placeholder="&mdash;"
+                   class="plan-input">
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button type="submit">Save</button>
+</form>
+{% else %}
+<p>No exercises yet. <a href="{{ url_for('admin_exercises') }}">Add some first.</a></p>
+{% endif %}
+{% endblock %}
