@@ -93,3 +93,18 @@ def test_api_note_saves_note(client, tmp_db):
 def test_api_note_invalid_json_returns_400(client):
     resp = client.post('/api/note', data='not-json', content_type='application/json')
     assert resp.status_code == 400
+
+def test_admin_plan_saves_plan_note(client, tmp_db):
+    db.add_exercise('Push-ups')
+    ex_id = db.get_active_exercises()[0]['id']
+    resp = client.post(
+        '/admin/plan',
+        data={
+            f'plan_{ex_id}_0': '20',
+            f'plan_note_{ex_id}_0': '10kg',
+        },
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    notes = db.get_plan_notes()
+    assert notes.get((ex_id, 0)) == '10kg'

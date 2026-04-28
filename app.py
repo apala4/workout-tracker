@@ -57,16 +57,21 @@ def admin_plan():
     if request.method == 'POST':
         exercises = db.get_active_exercises()
         plan = []
+        notes = {}
         for ex in exercises:
             for weekday in range(7):
                 val = request.form.get(f'plan_{ex["id"]}_{weekday}', '').strip()
+                note = request.form.get(f'plan_note_{ex["id"]}_{weekday}', '').strip()
                 if val.isdigit() and int(val) > 0:
                     plan.append((ex['id'], weekday, int(val)))
-        db.save_weekly_plan(plan)
+                    if note:
+                        notes[(ex['id'], weekday)] = note
+        db.save_weekly_plan(plan, notes)
         return redirect(url_for('admin_plan'))
     exercises = db.get_active_exercises()
     plan = db.get_weekly_plan()
-    return render_template('admin_plan.html', exercises=exercises, plan=plan)
+    plan_notes = db.get_plan_notes()
+    return render_template('admin_plan.html', exercises=exercises, plan=plan, plan_notes=plan_notes)
 
 @app.route('/api/log', methods=['POST'])
 def api_log():

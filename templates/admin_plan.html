@@ -25,6 +25,11 @@
                    min="1"
                    placeholder="&mdash;"
                    class="plan-input">
+            <input type="text"
+                   name="plan_note_{{ ex.id }}_{{ weekday }}"
+                   value="{{ plan_notes.get((ex.id, weekday), '') }}"
+                   placeholder="note…"
+                   class="plan-note-input">
           </td>
           {% endfor %}
         </tr>
