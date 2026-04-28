@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>This Week</h1>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Exercise</th>
+        {% for d in week_dates %}
+        <th class="{% if d == today %}today{% elif d < today %}past{% else %}future{% endif %}">
+          {{ d.strftime('%a') }}<br><small>{{ d.strftime('%d') }}</small>
+        </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ex in exercises %}
+      <tr>
+        <td class="ex-name">{{ ex.name }}</td>
+        {% for d in week_dates %}
+          {% set planned = plan.get((ex.id, d.weekday())) %}
+          {% set logged = logs.get((ex.id, d.isoformat())) %}
+          {% if d == today %}
+            {% if planned %}
+            <td class="cell today"
+                data-exercise-id="{{ ex.id }}"
+                data-date="{{ d.isoformat() }}"
+                data-planned="{{ planned }}"
+                onclick="openLogPopup(this)">
+              <span class="planned">{{ planned }}</span>
+              {% if logged %}
+              <span class="logged">&#x2713;{{ logged }}</span>
+              {% else %}
+              <span class="hint">tap</span>
+              {% endif %}
+            </td>
+            {% else %}
+            <td class="cell today empty">&#x2014;</td>
+            {% endif %}
+          {% elif d < today %}
+            {% if planned %}
+            <td class="cell past">
+              <span class="planned">{{ planned }}</span>
+              {% if logged %}<span class="logged">&#x2713;{{ logged }}</span>
+              {% else %}<span class="missed">&#x2014;</span>{% endif %}
+            </td>
+            {% else %}
+            <td class="cell past empty">&#x2014;</td>
+            {% endif %}
+          {% else %}
+            {% if planned %}
+            <td class="cell future"><span class="planned">{{ planned }}</span></td>
+            {% else %}
+            <td class="cell future empty">&#x2014;</td>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="log-overlay" class="overlay hidden">
+  <div class="popup">
+    <h2>Log reps</h2>
+    <p id="popup-planned"></p>
+    <input type="number" id="popup-input" min="0">
+    <div class="popup-actions">
+      <button onclick="submitLog()">Save</button>
+      <button onclick="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
