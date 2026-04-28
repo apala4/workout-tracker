@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Exercises</h1>
+{% if exercises %}
+<table>
+  <thead><tr><th>Name</th><th></th></tr></thead>
+  <tbody>
+    {% for ex in exercises %}
+    <tr>
+      <td>{{ ex.name }}</td>
+      <td>
+        <form method="POST" style="margin:0">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="exercise_id" value="{{ ex.id }}">
+          <button type="submit"
+            onclick="return confirm('Delete {{ ex.name | e }}?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No exercises yet.</p>
+{% endif %}
+<h2>Add exercise</h2>
+<form method="POST">
+  <input type="hidden" name="action" value="add">
+  <input type="text" name="name" placeholder="Exercise name" required>
+  <button type="submit">Add</button>
+</form>
+{% endblock %}
