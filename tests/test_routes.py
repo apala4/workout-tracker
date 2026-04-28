@@ -117,3 +117,4 @@ def test_index_renders_note_inputs(client, tmp_db):
     resp = client.get('/')
     assert resp.status_code == 200
     assert b'note-input' in resp.data
+    assert b'value="10kg"' in resp.data
