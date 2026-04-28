@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import timedelta
+from datetime import timedelta, date
 
 DATABASE = 'workout.db'
 
@@ -121,5 +121,31 @@ def log_workout(exercise_id, date_str, actual_reps):
         "INSERT OR REPLACE INTO workout_logs (exercise_id, date, actual_reps) VALUES (?, ?, ?)",
         (exercise_id, date_str, actual_reps)
     )
+    conn.commit()
+    conn.close()
+
+def get_week_notes(week_start):
+    week_end = week_start + timedelta(days=6)
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT exercise_id, date, note FROM workout_notes "
+        "WHERE date BETWEEN ? AND ?",
+        (week_start.isoformat(), week_end.isoformat())
+    ).fetchall()
+    conn.close()
+    return {(r['exercise_id'], r['date']): r['note'] for r in rows}
+
+def save_note(exercise_id, date_str, note):
+    conn = get_db()
+    if note:
+        conn.execute(
+            "INSERT OR REPLACE INTO workout_notes (exercise_id, date, note) VALUES (?, ?, ?)",
+            (exercise_id, date_str, note)
+        )
+    else:
+        conn.execute(
+            "DELETE FROM workout_notes WHERE exercise_id = ? AND date = ?",
+            (exercise_id, date_str)
+        )
     conn.commit()
     conn.close()

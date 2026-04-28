@@ -113,3 +113,36 @@ def test_save_weekly_plan_without_notes_clears_notes(tmp_db):
     db.save_weekly_plan([(ex_id, 0, 20)], notes={(ex_id, 0): 'heavy'})
     db.save_weekly_plan([(ex_id, 0, 20)])
     assert db.get_plan_notes() == {}
+
+def test_get_week_notes_empty(tmp_db):
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    assert db.get_week_notes(monday) == {}
+
+def test_save_and_get_week_notes(tmp_db):
+    db.add_exercise('Squats')
+    ex_id = db.get_active_exercises()[0]['id']
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    db.save_note(ex_id, today.isoformat(), 'felt strong')
+    notes = db.get_week_notes(monday)
+    assert notes[(ex_id, today.isoformat())] == 'felt strong'
+
+def test_save_note_updates_existing(tmp_db):
+    db.add_exercise('Squats')
+    ex_id = db.get_active_exercises()[0]['id']
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    db.save_note(ex_id, today.isoformat(), 'first')
+    db.save_note(ex_id, today.isoformat(), 'second')
+    notes = db.get_week_notes(monday)
+    assert notes[(ex_id, today.isoformat())] == 'second'
+
+def test_save_note_empty_string_deletes(tmp_db):
+    db.add_exercise('Squats')
+    ex_id = db.get_active_exercises()[0]['id']
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    db.save_note(ex_id, today.isoformat(), 'to delete')
+    db.save_note(ex_id, today.isoformat(), '')
+    assert db.get_week_notes(monday) == {}
